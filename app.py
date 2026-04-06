@@ -11,6 +11,7 @@ import ssl
 app = Flask(__name__)
 last_updated = ""
 result_data = []
+trade_date = ""
 
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -54,7 +55,7 @@ def find_latest_trading_day(start_date, max_days=30):
     return None, None
 
 def fetch_data():
-    global last_updated, result_data
+    global last_updated, result_data, trade_date
     try:
         today = datetime.date.today()
         print(f"\n開始選股，今天日期：{today}")
@@ -151,6 +152,7 @@ HTML = """
 </head>
 <body>
 <h1>台股爆量選股（量比 &gt; 1.5倍）</h1>
+<div style="font-size:15px; color:#555; margin-bottom:8px;">資料日期：{{ trade_date }}</div>
 <div class="updated">最後更新：{{ updated }}</div>
 <form method="post" action="/refresh">
   <button class="btn" type="submit">立即重新抓取</button>
@@ -183,7 +185,7 @@ HTML = """
 
 @app.route("/")
 def index():
-    return render_template_string(HTML, data=result_data, updated=last_updated or "尚未更新")
+    return render_template_string(HTML, data=result_data, updated=last_updated or "尚未更新", trade_date=trade_date or "尚未抓取")
 
 @app.route("/refresh", methods=["POST"])
 def refresh():
